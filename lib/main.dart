@@ -29,7 +29,15 @@ class ListDisplay extends StatefulWidget {
   }
 
   int getRandomNumber() {
-    return Random().nextInt(8999) + 1000;
+    int result;
+    do {
+      result = Random().nextInt(8999) + 1000;
+    } while (!ifAllNumbersAreUnique(result));
+    return result;
+  }
+
+  bool ifAllNumbersAreUnique(int numb) {
+    return numb.toString().split("").toSet().length == 4;
   }
 
   String getGuessCount() {
@@ -49,6 +57,12 @@ class Answers extends State<ListDisplay> {
     return new Scaffold(
         appBar: new AppBar(
           title: new Text("Sayı Bulmaca"),
+          actions: <Widget>[
+            IconButton(
+              onPressed: resetGame,
+              icon: Icon(Icons.refresh),
+            )
+          ],
         ),
         body: new Column(
           children: <Widget>[
@@ -74,15 +88,13 @@ class Answers extends State<ListDisplay> {
                     onSubmitted: (guessedNumber) {
                       if (guessedNumber.length == 4) {
                         if (guessedNumber == widget.number.toString()) {
-                          widget.number = widget.getRandomNumber();
                           Scaffold.of(context).showSnackBar(SnackBar(
                               backgroundColor: Colors.red[300],
                               content: Text(
                                 widget.getGuessCount() + ' tahminde kazandın!',
                                 style: TextStyle(fontSize: 25),
                               )));
-                          widget.litems.clear();
-                          widget.addThreeItemsAsHint();
+                          resetGame();
                         } else {
                           widget.litems.insert(0, guessedNumber);
                           FocusScope.of(context).requestFocus(focusNode);
@@ -131,6 +143,15 @@ class Answers extends State<ListDisplay> {
                     }))
           ],
         ));
+  }
+
+  void resetGame() {
+    setState(() {
+      widget.number = widget.getRandomNumber();
+      widget.litems.clear();
+      widget.addThreeItemsAsHint();
+      eCtrl.clear();
+    });
   }
 
   String calculateHint(String answer) {
